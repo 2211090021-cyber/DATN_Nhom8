@@ -1,0 +1,66 @@
+Tên đề tài: Ứng dụng Machine Learning trong dự đoán nguy cơ biến chứng tim mạch ở bệnh nhân cao huyết áp từ hồ sơ bệnh án điện tử (EMR) 
+1. Mục tiêu Đồ án
+Mục tiêu tổng quát: Xây dựng và đánh giá các mô hình học máy dự đoán nguy cơ biến chứng tim mạch ở bệnh nhân tăng huyết áp tại Bệnh viện Hữu Nghị, đề xuất công cụ hỗ trợ quyết định lâm sàng 
+Mục tiêu cụ thể:
+Phân tích đặc điểm dữ liệu EMR (nhân khẩu học, lâm sàng, cận lâm sàng, tiền sử bệnh) 
+Tiền xử lý và làm sạch dữ liệu (xử lý khuyết thiếu, ngoại lai, SMOTE).
+Xây dựng và so sánh 3 mô hình: Logistic Regression, Random Forest, và XGBoost 
+Đánh giá ưu tiên độ nhạy (Recall) và giải thích mô hình bằng SHAP .
+Xây dựng giao diện demo bằng Streamlit.
+2. Quy trình Thực hiện (Theo CRISP-DM)
+3. Chi tiết Kỹ thuật
+3.1. Thu thập dữ liệu
+Dữ liệu được trích xuất từ các bảng trong hệ thống EMR của Bệnh viện Hữu Nghị, bao gồm: thông tin hành chính, khám bệnh, xét nghiệm, chẩn đoán, đơn thuốc.
+Thời gian trích xuất: từ 01/01/2023 đến 28/02/2026. Mỗi bệnh nhân phải có thời gian theo dõi tối thiểu 12 tháng.
+3.2. Tiền xử lý dữ liệu
+Xử lý giá trị thiếu:
+Đánh giá tỷ lệ missing của từng biến. Biến có tỷ lệ missing > 60% cân nhắc loại bỏ.
+Biến liên tục: điền bằng median (nếu phân phối lệch) hoặc sử dụng MICE.
+Biến phân loại: điền bằng mode hoặc tạo nhóm “không rõ”.
+Phát hiện và xử lý ngoại lai: Sử dụng IQR cho các chỉ số xét nghiệm, các giá trị ngoài ngưỡng [Q1–1.5×IQR, Q3+1.5×IQR] được gán bằng ngưỡng (capping) hoặc loại bỏ nếu do nhập liệu sai.
+Chuẩn hóa: Áp dụng StandardScaler cho các biến liên tục.
+Mã hóa biến phân loại:
+One-Hot Encoding cho các biến không có thứ tự (ví dụ: nhóm thuốc).
+Label Encoding cho biến nhị phân (giới tính, tiền sử bệnh, hút thuốc…).
+Xử lý mất cân bằng:
+Sau khi chia train/test (stratified split), áp dụng SMOTE chỉ trên tập huấn luyện để tạo mẫu nhân tạo cho lớp thiểu số (bệnh nhân có biến chứng).
+Kết hợp với stratified k-fold cross-validation để đảm bảo tỷ lệ lớp trong mỗi fold.
+3.3. Phân tích khám phá dữ liệu (EDA)
+Thống kê mô tả:
+Bảng tóm tắt biến liên tục (mean, median, std, min, max, IQR).
+Bảng tần số biến phân loại.
+Trực quan hóa:
+Histogram + boxplot cho biến liên tục.
+Bar chart so sánh tỷ lệ biến chứng theo từng biến phân loại.
+Heatmap ma trận tương quan (Pearson) giữa các biến liên tục.
+Kiểm định thống kê:
+Biến liên tục: t-test hoặc Mann-Whitney U.
+Biến phân loại: Chi-square test.
+3.4. Lựa chọn đặc trưng
+Kết hợp các phương pháp:
+Loại bỏ biến có p-value > 0.05 trong kiểm định so sánh hai nhóm kết cục.
+Loại bỏ biến có độ tương quan > 0.9.
+Sử dụng feature importance từ Random Forest và XGBoost (trained trên tập huấn luyện) để chọn top 20–25 đặc trưng quan trọng.
+Với Logistic Regression, kiểm tra VIF để tránh đa cộng tuyến.
+3.5. Xây dựng và huấn luyện mô hình
+Chia dữ liệu: 80% train, 20% test, stratified split theo biến mục tiêu.
+Kỹ thuật tối ưu: GridSearchCV với 5-fold stratified cross-validation.
+Các mô hình:
+Logistic Regression: penalty = ‘l2’, solver = ‘liblinear’, tìm C tối ưu.
+Random Forest: tìm n_estimators (100–500), max_depth (5–20), min_samples_split (2–10).
+XGBoost: tìm learning_rate (0.01–0.3), max_depth (3–10), subsample (0.6–1.0), colsample_bytree (0.6–1.0).
+Xử lý mất cân bằng trong huấn luyện: Kết hợp SMOTE và class_weight (Logistic Regression, Random Forest) hoặc scale_pos_weight (XGBoost).
+3.6. Đánh giá và so sánh mô hình
+Trên tập test, tính:
+Confusion Matrix → Accuracy, Precision, Recall, F1-score.
+ROC-AUC và vẽ ROC curve.
+Calibration curve & Brier score.
+Tiêu chí chọn mô hình tốt nhất: Ưu tiên Recall cao (phát hiện đúng bệnh nhân có nguy cơ), kết hợp AUC và F1-score tốt. Mô hình có khả năng giải thích (SHAP) được ưu tiên.
+3.7. Giải thích mô hình (Explainable AI)
+Sử dụng SHAP để tính đóng góp của từng đặc trưng cho mỗi dự đoán.
+Vẽ SHAP summary plot, SHAP dependence plot cho các đặc trưng quan trọng.
+Chọn 2–3 bệnh nhân minh họa (case study) để giải thích lý do mô hình dự đoán nguy cơ cao/thấp.
+3.8. Xây dựng ứng dụng demo
+Công cụ: Streamlit (Python).
+Chức năng: Nhập dữ liệu bệnh nhân theo các trường đã xác định → hiển thị xác suất biến chứng, mức nguy cơ (cao/trung bình/thấp) và các yếu tố ảnh hưởng chính từ SHAP.
+Triển khai: Chạy local hoặc deploy lên Streamlit Cloud để trình bày.

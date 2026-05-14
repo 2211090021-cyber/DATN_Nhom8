@@ -1,0 +1,84 @@
+================================================================================
+        GIẢI THÍCH CHI TIẾT KẾT QUẢ ĐÁNH GIÁ MÔ HÌNH (SAU KHI XÓA RÒ RỈ DỮ LIỆU)
+        Dự án: Dự đoán biến chứng tim mạch ở bệnh nhân tăng huyết áp
+        Cập nhật lần cuối: 2026-05-04
+================================================================================
+
+TỔNG QUAN VỀ SỰ THAY ĐỔI LỚN:
+Khác với lần đánh giá trước (AUC > 0.98), ở lần chạy này, chúng ta đã loại bỏ các
+biến rò rỉ dữ liệu (Data Leakage) nghiêm trọng là `suy_tim`, `dot_quy`, và `rung_nhi`
+(do chúng tương ứng trực tiếp với nhãn dự đoán `Target`). 
+
+Việc loại bỏ các "đáp án có sẵn" này đã đưa bài toán về đúng bản chất thực tế lâm
+sàng: Dự báo sớm biến chứng dựa trên các chỉ số sinh hóa (Mỡ máu, HbA1c), bệnh nền
+khác (Đái tháo đường, Thận mạn), và Tuổi tác. Do đó, các chỉ số hiệu suất (Metrics) 
+đã giảm mạnh xuống mức thực tế, phản ánh độ khó cực lớn của bài toán y khoa này.
+
+--------------------------------------------------------------------------------
+BẢNG SO SÁNH TỔNG HỢP CÁC MÔ HÌNH
+--------------------------------------------------------------------------------
+Dữ liệu từ tập test (2344 ca Không biến chứng, 127 ca Có biến chứng):
+
+  Model                │ Accuracy │ Precision │ Recall │ F1-Score │ ROC-AUC │ Brier
+  ─────────────────────┼──────────┼───────────┼────────┼──────────┼─────────┼───────
+  XGBoost              │  0.8733  │  0.1280   │ 0.2520 │  0.1698  │  0.6504 │ 0.0940
+  Random Forest        │  0.8033  │  0.0911   │ 0.3150 │  0.1413  │  0.6336 │ 0.1332
+  Logistic Regression  │  0.6884  │  0.0852   │ 0.5197 │  0.1463  │  0.6440 │ 0.1966
+
+--------------------------------------------------------------------------------
+PHÂN TÍCH CHI TIẾT TỪNG MÔ HÌNH
+--------------------------------------------------------------------------------
+1. Logistic Regression (LR) — "Nhạy nhưng báo động giả nhiều nhất"
+   - Thuật toán chọn LR làm Champion tự động vì code ưu tiên `Recall`. LR đạt 
+     Recall cao nhất (51.97%), tức là phát hiện được khoảng một nửa số ca biến chứng.
+   - TUY NHIÊN, cái giá phải trả là Precision cực thấp (8.52%) và Accuracy thấp
+     (68.84%). Điều này có nghĩa LR có xu hướng "dự đoán bừa" rất nhiều ca là có
+     biến chứng (hơn 700 ca False Positive), gây ra hiện tượng "còi báo động giả"
+     quá mức trong lâm sàng.
+
+2. XGBoost — "Cân bằng và Thực tế nhất"
+   - Dù Recall thấp hơn (25.2%), XGBoost lại là mô hình tốt nhất về tổng thể:
+     Đạt Accuracy cao nhất (87.33%), Precision cao nhất (12.80%), F1-Score cao
+     nhất (0.1698) và AUC tốt nhất (0.6504).
+   - XGBoost kiểm soát False Positive tốt hơn nhiều, tránh gây hoang mang cho
+     bệnh nhân. Brier score (0.0940) cũng thấp nhất, chứng tỏ xác suất dự báo 
+     đáng tin cậy nhất.
+
+3. Random Forest (RF) — "Nằm ở khoảng giữa"
+   - RF có Recall khá (31.5%) nhưng Precision vẫn dưới 10% (9.11%). Nhìn chung,
+     hiệu suất của RF nằm giữa LR và XGBoost.
+
+--------------------------------------------------------------------------------
+SỰ THAY ĐỔI VỀ FEATURE IMPORTANCE (ĐỘ QUAN TRỌNG ĐẶC TRƯNG)
+--------------------------------------------------------------------------------
+Với sự biến mất của `suy_tim` và `dot_quy`, biểu đồ Feature Importance của cả 
+Random Forest và XGBoost giờ đây đã trở thành một bức tranh thuần túy về sinh hóa
+và tuổi tác:
+
+- Tuổi tác (Age): Trở thành một trong những yếu tố dự báo mạnh mẽ nhất. Tuổi cao
+  đi kèm với tỷ lệ biến chứng cao.
+- Lipid máu (LDL, HDL, Triglycerid): Các chỉ số mỡ máu, đặc biệt là các giá trị
+  mean, max, và min vươn lên chiếm thế chủ đạo trong biểu đồ. Mối liên hệ sinh
+  lý học giữa rối loạn mỡ máu và biến chứng tim mạch giờ đã được mô hình khai
+  thác triệt để thay vì bị "lu mờ" như trước.
+- Đái tháo đường (dai_thao_duong): Vẫn giữ vững vai trò là một bệnh đồng mắc có
+  tác động rất lớn đến kết cục tim mạch.
+
+--------------------------------------------------------------------------------
+KẾT LUẬN & ĐỀ XUẤT LÂM SÀNG
+--------------------------------------------------------------------------------
+1. GIÁ TRỊ THỰC TẾ:
+   AUC ~ 0.65 là một kết quả khiêm tốn nhưng hoàn toàn BÌNH THƯỜNG và TRUNG THỰC
+   đối với các mô hình dự báo sinh hóa thuần túy (không có thông tin chẩn đoán
+   nặng). Mô hình đã thực sự học được một số pattern từ lipid máu để vượt qua
+   ngưỡng random (AUC=0.5).
+
+2. ĐỀ XUẤT SỬ DỤNG XGBOOST ĐỂ PHÂN TÍCH SHAP:
+   Dù script tự động gán LR làm Champion (do Recall cao), LR quá "nhiễu" do FP cao.
+   XGBoost mới là mô hình đáng tin cậy nhất (F1, Accuracy, AUC cao nhất). Chúng ta
+   sẽ chuyển hướng sang dùng XGBoost để phân tích SHAP nhằm rút ra các giá trị
+   khoa học chính xác nhất từ mỡ máu.
+
+================================================================================
+                            END OF SUMMARY
+================================================================================

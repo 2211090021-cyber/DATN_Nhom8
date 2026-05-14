@@ -1,0 +1,456 @@
+========================================================================
+  BÁO CÁO PHÂN TÍCH NGUY CƠ TIM MẠCH — CHAMPION MODEL (XGBoost)
+  Dự án: Dự đoán biến chứng tim mạch ở bệnh nhân tăng huyết áp
+========================================================================
+
+Tổng số bệnh nhân trong test set : 2471
+Tỷ lệ thực sự CÓ biến chứng     : 5.14%
+Độ chính xác mô hình             : 87.33%
+Features sử dụng                 : GioiTinh, LDL_mean, LDL_max, LDL_min, LDL_std, LDL_last, HDL_mean, HDL_min, HDL_std, Triglycerid_mean, Triglycerid_max, Triglycerid_min, Triglycerid_last, Age, dai_thao_duong, rl_lipid_mau, suy_than_man
+
+────────────────────────────────────────────────────────────────────────
+  NHÓM NGUY CƠ CAO — TOP 10 BỆNH NHÂN
+────────────────────────────────────────────────────────────────────────
+  (Chọn theo xác suất dự đoán cao nhất; ưu tiên True Positive)
+
+────────────────────────────────────────  [1/10]
+  Bệnh nhân #0824  |  Xác suất=89.9%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Tuổi: tuổi rất cao (người già)  (tác động SHAP=+0.771)
+      + Triglycerid trung bình: rất thấp  (tác động SHAP=+0.411)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.388)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.220)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.205)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.145)
+      + LDL lần đo cuối: thấp  (tác động SHAP=+0.129)
+      + HDL thấp nhất: rất thấp  (tác động SHAP=+0.105)
+      + HDL độ biến động: rất cao  (tác động SHAP=+0.101)
+      + LDL trung bình (mỡ xấu): rất thấp  (tác động SHAP=+0.062)
+      + LDL cao nhất: rất thấp  (tác động SHAP=+0.061)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Triglycerid lần đo cuối: rất thấp  (tác động SHAP=-0.326)
+      - LDL độ biến động: thấp  (tác động SHAP=-0.057)
+
+────────────────────────────────────────  [2/10]
+  Bệnh nhân #1578  |  Xác suất=83.8%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + HDL độ biến động: rất cao  (tác động SHAP=+0.365)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.338)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.263)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.171)
+      + LDL độ biến động: hơi cao hơn trung bình  (tác động SHAP=+0.161)
+      + Tuổi: tuổi rất cao (người già)  (tác động SHAP=+0.132)
+      + HDL thấp nhất: thấp  (tác động SHAP=+0.095)
+      + Triglycerid cao nhất: hơi thấp hơn trung bình  (tác động SHAP=+0.089)
+      + LDL cao nhất: hơi cao hơn trung bình  (tác động SHAP=+0.071)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Triglycerid lần đo cuối: cao  (tác động SHAP=-0.106)
+
+────────────────────────────────────────  [3/10]
+  Bệnh nhân #2059  |  Xác suất=81.5%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + HDL độ biến động: rất cao  (tác động SHAP=+0.745)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.318)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.257)
+      + LDL thấp nhất: hơi thấp hơn trung bình  (tác động SHAP=+0.237)
+      + Triglycerid lần đo cuối: hơi thấp hơn trung bình  (tác động SHAP=+0.183)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.158)
+      + LDL độ biến động: hơi cao hơn trung bình  (tác động SHAP=+0.104)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi cao  (tác động SHAP=-0.401)
+      - Triglycerid thấp nhất: hơi cao hơn trung bình  (tác động SHAP=-0.159)
+
+────────────────────────────────────────  [4/10]
+  Bệnh nhân #2141  |  Xác suất=81.4%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Tuổi: tuổi rất cao (người già)  (tác động SHAP=+0.854)
+      + HDL độ biến động: rất cao  (tác động SHAP=+0.558)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.331)
+      + Triglycerid lần đo cuối: thấp  (tác động SHAP=+0.279)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.136)
+      + HDL trung bình (mỡ tốt): cao  (tác động SHAP=+0.086)
+      + LDL độ biến động: thấp  (tác động SHAP=+0.086)
+      + LDL lần đo cuối: cao  (tác động SHAP=+0.056)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.827)
+      - Triglycerid trung bình: thấp  (tác động SHAP=-0.053)
+      - LDL thấp nhất: hơi cao hơn trung bình  (tác động SHAP=-0.051)
+
+────────────────────────────────────────  [5/10]
+  Bệnh nhân #1511  |  Xác suất=80.1%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Triglycerid thấp nhất: thấp  (tác động SHAP=+0.401)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.340)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.254)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.252)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.186)
+      + LDL trung bình (mỡ xấu): thấp  (tác động SHAP=+0.157)
+      + Triglycerid trung bình: thấp  (tác động SHAP=+0.145)
+      + HDL thấp nhất: thấp  (tác động SHAP=+0.114)
+      + LDL độ biến động: thấp  (tác động SHAP=+0.072)
+      + Suy thận mãn (0/1): Không có suy thận mãn  (tác động SHAP=+0.055)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi cao  (tác động SHAP=-0.349)
+      - LDL cao nhất: thấp  (tác động SHAP=-0.132)
+      - Triglycerid cao nhất: thấp  (tác động SHAP=-0.101)
+
+────────────────────────────────────────  [6/10]
+  Bệnh nhân #0706  |  Xác suất=79.9%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + HDL thấp nhất: thấp  (tác động SHAP=+0.431)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.387)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.225)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.217)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.150)
+      + LDL độ biến động: rất cao  (tác động SHAP=+0.111)
+      + Triglycerid lần đo cuối: hơi cao hơn trung bình  (tác động SHAP=+0.093)
+      + LDL cao nhất: cao  (tác động SHAP=+0.083)
+      + Triglycerid trung bình: cao  (tác động SHAP=+0.067)
+      + HDL trung bình (mỡ tốt): rất thấp  (tác động SHAP=+0.061)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi cao  (tác động SHAP=-0.390)
+
+────────────────────────────────────────  [7/10]
+  Bệnh nhân #1391  |  Xác suất=77.9%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.393)
+      + Triglycerid thấp nhất: thấp  (tác động SHAP=+0.284)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.282)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.215)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.164)
+      + Triglycerid trung bình: rất thấp  (tác động SHAP=+0.114)
+      + HDL trung bình (mỡ tốt): cao  (tác động SHAP=+0.094)
+      + HDL độ biến động: cao  (tác động SHAP=+0.066)
+      + Suy thận mãn (0/1): Không có suy thận mãn  (tác động SHAP=+0.051)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi cao  (tác động SHAP=-0.187)
+      - LDL lần đo cuối: cao  (tác động SHAP=-0.131)
+      - LDL độ biến động: cao  (tác động SHAP=-0.073)
+
+────────────────────────────────────────  [8/10]
+  Bệnh nhân #1808  |  Xác suất=73.3%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Triglycerid thấp nhất: thấp  (tác động SHAP=+0.347)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.298)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.284)
+      + HDL độ biến động: rất cao  (tác động SHAP=+0.224)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.172)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.160)
+      + Triglycerid lần đo cuối: thấp  (tác động SHAP=+0.133)
+      + HDL trung bình (mỡ tốt): cao  (tác động SHAP=+0.058)
+      + Suy thận mãn (0/1): Không có suy thận mãn  (tác động SHAP=+0.056)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi rất cao (người già)  (tác động SHAP=-0.300)
+      - LDL cao nhất: thấp  (tác động SHAP=-0.198)
+      - HDL thấp nhất: hơi cao hơn trung bình  (tác động SHAP=-0.102)
+      - Triglycerid trung bình: thấp  (tác động SHAP=-0.058)
+      - LDL lần đo cuối: hơi thấp hơn trung bình  (tác động SHAP=-0.056)
+
+────────────────────────────────────────  [9/10]
+  Bệnh nhân #0223  |  Xác suất=73.2%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + HDL độ biến động: rất cao  (tác động SHAP=+0.505)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.349)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.273)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.195)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.172)
+      + LDL lần đo cuối: thấp  (tác động SHAP=+0.127)
+      + LDL trung bình (mỡ xấu): thấp  (tác động SHAP=+0.100)
+      + Triglycerid thấp nhất: thấp  (tác động SHAP=+0.093)
+      + Triglycerid cao nhất: hơi cao hơn trung bình  (tác động SHAP=+0.081)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi cao  (tác động SHAP=-0.493)
+      - Triglycerid lần đo cuối: cao  (tác động SHAP=-0.273)
+      - LDL cao nhất: rất thấp  (tác động SHAP=-0.120)
+
+────────────────────────────────────────  [10/10]
+  Bệnh nhân #1196  |  Xác suất=73.0%  |  Thực tế=CÓ BIẾN CHỨNG  |  [TP]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự có biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.267)
+      + HDL độ biến động: cao  (tác động SHAP=+0.222)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.216)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.196)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.182)
+      + LDL trung bình (mỡ xấu): hơi thấp hơn trung bình  (tác động SHAP=+0.125)
+      + Triglycerid cao nhất: hơi thấp hơn trung bình  (tác động SHAP=+0.079)
+      + Triglycerid thấp nhất: hơi thấp hơn trung bình  (tác động SHAP=+0.076)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Tuổi: tuổi cao  (tác động SHAP=-0.233)
+      - Triglycerid trung bình: hơi thấp hơn trung bình  (tác động SHAP=-0.083)
+      - HDL thấp nhất: thấp  (tác động SHAP=-0.078)
+      - Triglycerid lần đo cuối: hơi cao hơn trung bình  (tác động SHAP=-0.073)
+
+
+────────────────────────────────────────────────────────────────────────
+  NHÓM NGUY CƠ THẤP — TOP 10 BỆNH NHÂN
+────────────────────────────────────────────────────────────────────────
+  (Chọn theo xác suất dự đoán thấp nhất; ưu tiên True Negative)
+
+────────────────────────────────────────  [1/10]
+  Bệnh nhân #2080  |  Xác suất=0.2%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.119)
+      + Rối loạn lipid máu (0/1): Không có rối loạn lipid  (tác động SHAP=+0.054)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Triglycerid thấp nhất: rất cao  (tác động SHAP=-1.669)
+      - LDL trung bình (mỡ xấu): rất thấp  (tác động SHAP=-0.993)
+      - Tuổi: tuổi trung niên  (tác động SHAP=-0.845)
+      - LDL lần đo cuối: rất thấp  (tác động SHAP=-0.645)
+      - HDL trung bình (mỡ tốt): thấp  (tác động SHAP=-0.544)
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.492)
+      - HDL độ biến động: thấp  (tác động SHAP=-0.296)
+      - HDL thấp nhất: thấp  (tác động SHAP=-0.277)
+      - Triglycerid cao nhất: rất cao  (tác động SHAP=-0.255)
+      - LDL cao nhất: rất thấp  (tác động SHAP=-0.200)
+      - LDL độ biến động: hơi thấp hơn trung bình  (tác động SHAP=-0.105)
+      - Triglycerid lần đo cuối: rất cao  (tác động SHAP=-0.060)
+
+────────────────────────────────────────  [2/10]
+  Bệnh nhân #2209  |  Xác suất=0.3%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-1.470)
+      - Tuổi: tuổi rất trẻ  (tác động SHAP=-1.244)
+      - Đái tháo đường (0/1): Có đái tháo đường  (tác động SHAP=-0.756)
+      - Triglycerid thấp nhất: rất cao  (tác động SHAP=-0.550)
+      - LDL thấp nhất: cao  (tác động SHAP=-0.406)
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.397)
+      - LDL lần đo cuối: rất cao  (tác động SHAP=-0.245)
+      - Triglycerid lần đo cuối: cao  (tác động SHAP=-0.218)
+      - HDL trung bình (mỡ tốt): hơi cao hơn trung bình  (tác động SHAP=-0.187)
+      - LDL trung bình (mỡ xấu): cao  (tác động SHAP=-0.158)
+      - LDL độ biến động: hơi cao hơn trung bình  (tác động SHAP=-0.091)
+      - Triglycerid cao nhất: hơi cao hơn trung bình  (tác động SHAP=-0.075)
+      - HDL độ biến động: hơi thấp hơn trung bình  (tác động SHAP=-0.070)
+      - HDL thấp nhất: hơi cao hơn trung bình  (tác động SHAP=-0.050)
+
+────────────────────────────────────────  [3/10]
+  Bệnh nhân #2233  |  Xác suất=0.3%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + LDL cao nhất: cao  (tác động SHAP=+0.061)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-1.495)
+      - Tuổi: tuổi trẻ  (tác động SHAP=-1.079)
+      - Đái tháo đường (0/1): Có đái tháo đường  (tác động SHAP=-0.816)
+      - Triglycerid cao nhất: rất cao  (tác động SHAP=-0.519)
+      - LDL thấp nhất: rất cao  (tác động SHAP=-0.442)
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.340)
+      - LDL độ biến động: thấp  (tác động SHAP=-0.253)
+      - LDL lần đo cuối: rất cao  (tác động SHAP=-0.230)
+      - Triglycerid thấp nhất: rất cao  (tác động SHAP=-0.222)
+      - HDL trung bình (mỡ tốt): hơi thấp hơn trung bình  (tác động SHAP=-0.106)
+      - HDL thấp nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.101)
+      - LDL trung bình (mỡ xấu): rất cao  (tác động SHAP=-0.077)
+
+────────────────────────────────────────  [4/10]
+  Bệnh nhân #1191  |  Xác suất=0.3%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.143)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-1.612)
+      - Tuổi: tuổi rất trẻ  (tác động SHAP=-0.960)
+      - HDL độ biến động: rất thấp  (tác động SHAP=-0.737)
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.525)
+      - HDL thấp nhất: rất cao  (tác động SHAP=-0.364)
+      - Triglycerid cao nhất: rất thấp  (tác động SHAP=-0.323)
+      - HDL trung bình (mỡ tốt): rất cao  (tác động SHAP=-0.293)
+      - LDL thấp nhất: hơi cao hơn trung bình  (tác động SHAP=-0.264)
+      - LDL độ biến động: cao  (tác động SHAP=-0.253)
+      - LDL trung bình (mỡ xấu): cao  (tác động SHAP=-0.216)
+      - Triglycerid lần đo cuối: thấp  (tác động SHAP=-0.140)
+      - Triglycerid trung bình: thấp  (tác động SHAP=-0.114)
+      - LDL cao nhất: cao  (tác động SHAP=-0.088)
+
+────────────────────────────────────────  [5/10]
+  Bệnh nhân #0672  |  Xác suất=0.4%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.092)
+      + LDL cao nhất: cao  (tác động SHAP=+0.084)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-1.915)
+      - Tuổi: tuổi rất trẻ  (tác động SHAP=-1.262)
+      - LDL độ biến động: rất cao  (tác động SHAP=-1.060)
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.592)
+      - LDL lần đo cuối: rất cao  (tác động SHAP=-0.195)
+      - Triglycerid thấp nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.179)
+      - Triglycerid cao nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.166)
+      - Triglycerid trung bình: hơi thấp hơn trung bình  (tác động SHAP=-0.128)
+      - Triglycerid lần đo cuối: hơi thấp hơn trung bình  (tác động SHAP=-0.109)
+      - HDL độ biến động: cao  (tác động SHAP=-0.108)
+      - HDL trung bình (mỡ tốt): thấp  (tác động SHAP=-0.072)
+
+────────────────────────────────────────  [6/10]
+  Bệnh nhân #2114  |  Xác suất=0.4%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.176)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.137)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-2.307)
+      - Tuổi: tuổi rất trẻ  (tác động SHAP=-1.600)
+      - LDL thấp nhất: cao  (tác động SHAP=-0.626)
+      - Triglycerid thấp nhất: rất cao  (tác động SHAP=-0.560)
+      - HDL trung bình (mỡ tốt): hơi cao hơn trung bình  (tác động SHAP=-0.200)
+      - Triglycerid lần đo cuối: cao  (tác động SHAP=-0.139)
+      - HDL thấp nhất: cao  (tác động SHAP=-0.112)
+      - HDL độ biến động: hơi thấp hơn trung bình  (tác động SHAP=-0.104)
+      - LDL độ biến động: hơi thấp hơn trung bình  (tác động SHAP=-0.097)
+      - LDL cao nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.078)
+
+────────────────────────────────────────  [7/10]
+  Bệnh nhân #2388  |  Xác suất=0.4%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.126)
+      + Triglycerid trung bình: cao  (tác động SHAP=+0.070)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-1.857)
+      - Đái tháo đường (0/1): Có đái tháo đường  (tác động SHAP=-0.923)
+      - LDL thấp nhất: cao  (tác động SHAP=-0.626)
+      - Triglycerid lần đo cuối: rất cao  (tác động SHAP=-0.448)
+      - LDL độ biến động: thấp  (tác động SHAP=-0.437)
+      - Tuổi: tuổi cao  (tác động SHAP=-0.417)
+      - HDL độ biến động: thấp  (tác động SHAP=-0.327)
+      - Triglycerid cao nhất: rất cao  (tác động SHAP=-0.251)
+      - HDL trung bình (mỡ tốt): thấp  (tác động SHAP=-0.135)
+      - LDL cao nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.096)
+      - LDL trung bình (mỡ xấu): hơi cao hơn trung bình  (tác động SHAP=-0.064)
+
+────────────────────────────────────────  [8/10]
+  Bệnh nhân #0476  |  Xác suất=0.4%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.124)
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.100)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-2.138)
+      - Tuổi: tuổi trung niên  (tác động SHAP=-0.824)
+      - LDL thấp nhất: rất cao  (tác động SHAP=-0.655)
+      - LDL độ biến động: thấp  (tác động SHAP=-0.467)
+      - LDL lần đo cuối: cao  (tác động SHAP=-0.276)
+      - LDL trung bình (mỡ xấu): cao  (tác động SHAP=-0.276)
+      - HDL trung bình (mỡ tốt): thấp  (tác động SHAP=-0.232)
+      - Triglycerid thấp nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.200)
+      - HDL thấp nhất: thấp  (tác động SHAP=-0.179)
+      - Triglycerid lần đo cuối: cao  (tác động SHAP=-0.163)
+      - HDL độ biến động: hơi cao hơn trung bình  (tác động SHAP=-0.112)
+      - Triglycerid cao nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.093)
+
+────────────────────────────────────────  [9/10]
+  Bệnh nhân #0972  |  Xác suất=0.4%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + Giới tính (0=Nữ, 1=Nam): Nữ  (tác động SHAP=+0.124)
+      + LDL thấp nhất: thấp  (tác động SHAP=+0.064)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-2.307)
+      - Tuổi: tuổi trung niên  (tác động SHAP=-1.012)
+      - Đái tháo đường (0/1): Có đái tháo đường  (tác động SHAP=-0.988)
+      - Triglycerid thấp nhất: rất thấp  (tác động SHAP=-0.370)
+      - Triglycerid cao nhất: thấp  (tác động SHAP=-0.310)
+      - HDL trung bình (mỡ tốt): hơi cao hơn trung bình  (tác động SHAP=-0.132)
+      - LDL cao nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.110)
+      - HDL thấp nhất: hơi thấp hơn trung bình  (tác động SHAP=-0.100)
+      - Triglycerid trung bình: thấp  (tác động SHAP=-0.077)
+      - LDL độ biến động: hơi cao hơn trung bình  (tác động SHAP=-0.066)
+      - HDL độ biến động: hơi thấp hơn trung bình  (tác động SHAP=-0.063)
+      - Triglycerid lần đo cuối: thấp  (tác động SHAP=-0.061)
+
+────────────────────────────────────────  [10/10]
+  Bệnh nhân #0428  |  Xác suất=0.5%  |  Thực tế=KHÔNG BC  |  [TN]
+  → Dự đoán ĐÚNG — bệnh nhân thực sự không biến chứng
+    ▲ Yếu tố TĂNG nguy cơ (đẩy xác suất lên):
+      + LDL cao nhất: rất cao  (tác động SHAP=+0.149)
+      + Đái tháo đường (0/1): Không có đái tháo đường  (tác động SHAP=+0.094)
+    ▼ Yếu tố BẢO VỆ (kéo xác suất xuống):
+      - Rối loạn lipid máu (0/1): Có rối loạn lipid máu  (tác động SHAP=-2.156)
+      - Tuổi: tuổi cao  (tác động SHAP=-0.604)
+      - LDL thấp nhất: rất cao  (tác động SHAP=-0.581)
+      - Giới tính (0=Nữ, 1=Nam): Nam  (tác động SHAP=-0.382)
+      - HDL thấp nhất: cao  (tác động SHAP=-0.277)
+      - LDL lần đo cuối: rất cao  (tác động SHAP=-0.255)
+      - Triglycerid trung bình: cao  (tác động SHAP=-0.239)
+      - Triglycerid thấp nhất: cao  (tác động SHAP=-0.238)
+      - LDL trung bình (mỡ xấu): rất cao  (tác động SHAP=-0.226)
+      - HDL độ biến động: thấp  (tác động SHAP=-0.190)
+      - LDL độ biến động: thấp  (tác động SHAP=-0.170)
+      - Triglycerid lần đo cuối: hơi thấp hơn trung bình  (tác động SHAP=-0.166)
+      - Triglycerid cao nhất: cao  (tác động SHAP=-0.097)
+
+
+========================================================================
+  KẾT LUẬN LÂM SÀNG
+========================================================================
+
+A. KHI NÀO BỆNH NHÂN CÓ NGUY CƠ CAO?
+   Mô hình đánh giá nguy cơ CAO khi bệnh nhân hội tụ nhiều yếu tố sau:
+
+   ➤ Đái tháo đường (0/1)                      (SHAP trung bình: +0.3238)
+   ➤ HDL độ biến động                          (SHAP trung bình: +0.2807)
+   ➤ LDL thấp nhất                             (SHAP trung bình: +0.1923)
+   ➤ Rối loạn lipid máu (0/1)                  (SHAP trung bình: +0.1623)
+   ➤ Giới tính (0=Nữ, 1=Nam)                   (SHAP trung bình: +0.1336)
+   ➤ Triglycerid thấp nhất                     (SHAP trung bình: +0.1041)
+   ➤ HDL thấp nhất                             (SHAP trung bình: +0.0553)
+   ➤ LDL trung bình (mỡ xấu)                   (SHAP trung bình: +0.0511)
+   ➤ LDL độ biến động                          (SHAP trung bình: +0.0473)
+   ➤ Triglycerid trung bình                    (SHAP trung bình: +0.0448)
+   ➤ Suy thận mãn (0/1)                        (SHAP trung bình: +0.0430)
+   ➤ HDL trung bình (mỡ tốt)                   (SHAP trung bình: +0.0268)
+
+   → Tổng kết: Bệnh nhân nguy cơ CAO thường là người CAO TUỔI, có LDL cao
+     (đặc biệt LDL_max và LDL_mean), có bệnh đái tháo đường kèm theo, và/hoặc
+     suy thận mãn. Triglycerid cao cũng là một yếu tố đẩy nguy cơ lên.
+     HDL thấp (mỡ tốt thấp) làm mất đi tác dụng bảo vệ tim mạch.
+
+
+B. KHI NÀO BỆNH NHÂN CÓ NGUY CƠ THẤP?
+   Mô hình đánh giá nguy cơ THẤP khi bệnh nhân có đặc điểm sau:
+
+   ✓ Rối loạn lipid máu (0/1)                  (SHAP trung bình: -1.7202)
+   ✓ Tuổi                                      (SHAP trung bình: -0.9847)
+   ✓ Triglycerid thấp nhất                     (SHAP trung bình: -0.3986)
+   ✓ LDL thấp nhất                             (SHAP trung bình: -0.3510)
+   ✓ LDL độ biến động                          (SHAP trung bình: -0.2998)
+   ✓ Đái tháo đường (0/1)                      (SHAP trung bình: -0.2735)
+   ✓ Giới tính (0=Nữ, 1=Nam)                   (SHAP trung bình: -0.2241)
+   ✓ Triglycerid cao nhất                      (SHAP trung bình: -0.2070)
+   ✓ HDL độ biến động                          (SHAP trung bình: -0.2024)
+   ✓ LDL trung bình (mỡ xấu)                   (SHAP trung bình: -0.1962)
+   ✓ HDL trung bình (mỡ tốt)                   (SHAP trung bình: -0.1945)
+   ✓ LDL lần đo cuối                           (SHAP trung bình: -0.1850)
+   ✓ Triglycerid lần đo cuối                   (SHAP trung bình: -0.1550)
+   ✓ HDL thấp nhất                             (SHAP trung bình: -0.1454)
+   ✓ Triglycerid trung bình                    (SHAP trung bình: -0.0594)
+   ✓ LDL cao nhất                              (SHAP trung bình: -0.0299)
+
+   → Tổng kết: Bệnh nhân nguy cơ THẤP thường là người TRẺ TUỔI, không có
+     đái tháo đường hay suy thận mãn, có LDL được kiểm soát tốt (thấp),
+     và HDL ở mức cao (mỡ tốt bảo vệ tim mạch). Triglycerid ổn định thấp.
+
+
+C. GHI CHÚ VỀ FALSE NEGATIVE (Mô hình bỏ sót):
+   Một số bệnh nhân THỰC TẾ CÓ biến chứng nhưng mô hình đánh giá nguy cơ thấp.
+   Đây là "góc khuất" của dữ liệu — bệnh nhân này thường:
+     - Còn trẻ và có xét nghiệm máu bình thường
+     - Nguyên nhân biến chứng có thể do yếu tố KHÔNG được ghi nhận:
+       hút thuốc lá, rượu bia, căng thẳng mãn tính, yếu tố di truyền.
+   → Đề xuất: Thu thập thêm các biến lối sống để cải thiện recall.
+
+========================================================================
+  END OF REPORT
+========================================================================

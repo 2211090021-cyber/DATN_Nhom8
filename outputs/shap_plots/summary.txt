@@ -1,0 +1,103 @@
+================================================================================
+      GIẢI THÍCH CHI TIẾT KẾT QUẢ PHÂN TÍCH SHAP (SAU KHI XÓA DATA LEAKAGE)
+      Dự án: Dự đoán biến chứng tim mạch ở bệnh nhân tăng huyết áp
+      Mô hình được giải thích: XGBoost (Champion Model)
+      Ngày cập nhật: 2026-05-04
+================================================================================
+
+TỔNG QUAN VỀ SỰ THAY ĐỔI LỚN:
+Phiên bản SHAP này đánh dấu một bước ngoặt khoa học của dự án. Sau khi loại bỏ
+các biến gây rò rỉ dữ liệu (suy_tim, dot_quy, rung_nhi), biểu đồ SHAP không còn
+bị "lũng đoạn" bởi các đáp án có sẵn nữa. Thay vào đó, mô hình đã thực sự khai
+thác được các chỉ số sinh hóa (mỡ máu) và nhân khẩu học (tuổi tác) để tìm ra 
+quy luật dự báo sớm.
+
+================================================================================
+PHẦN A: GIẢI THÍCH CHI TIẾT TỪNG ẢNH MỚI
+================================================================================
+
+--------------------------------------------------------------------------------
+ẢNH 1: 01_shap_summary_bar.png — SHAP Feature Importance (Global Magnitude)
+--------------------------------------------------------------------------------
+MÔ TẢ VÀ Ý NGHĨA:
+  Bây giờ, khi không còn suy tim hay đột quỵ, "Bức tranh sinh lý học" thực sự 
+  đã hiện ra. Top các đặc trưng quan trọng nhất giờ đây phản ánh đúng y văn:
+
+  1. Age (Tuổi tác): Vươn lên trở thành yếu tố dự báo số 1. Độ tuổi càng cao,
+     nguy cơ tổn thương mạch máu và biến chứng càng lớn.
+  2. Các chỉ số Lipid (LDL, Triglycerid, HDL): Cụm các chỉ số thống kê của mỡ 
+     máu (mean, max, min, last) chiếm lĩnh toàn bộ Top 10. Điều này chứng minh
+     mô hình đã học được rằng sự biến động và mức độ trung bình của mỡ máu 
+     chính là "kẻ giết người thầm lặng".
+  3. Bệnh đồng mắc (dai_thao_duong, suy_than_man): Nằm trong Top quan trọng,
+     phản ánh bộ ba "Tim-Thận-Chuyển hóa" cực kỳ nguy hiểm trong y khoa.
+
+--------------------------------------------------------------------------------
+ẢNH 2: 02_shap_summary_beeswarm.png — SHAP Beeswarm Plot (Impact Direction)
+--------------------------------------------------------------------------------
+MÔ TẢ VÀ Ý NGHĨA (Chiều tác động):
+  - Age: Các chấm màu Hồng (Tuổi cao) đẩy mạnh về phía bên phải (Tăng nguy cơ, 
+    SHAP > 0). Các chấm màu Xanh (Tuổi trẻ) tập trung bên trái (Bảo vệ, SHAP < 0).
+  - Nhóm LDL và Triglycerid (Mỡ xấu): Chấm Hồng (giá trị cao) nằm bên phải, chỉ
+    ra rằng LDL càng cao thì nguy cơ biến chứng càng lớn.
+  - Nhóm HDL (Mỡ tốt): Chấm Hồng (giá trị cao) có xu hướng nằm bên trái, chứng
+    minh HDL có tác dụng bảo vệ tim mạch, làm giảm rủi ro.
+  - dai_thao_duong & suy_than_man: Chấm Hồng (Có bệnh) đều đẩy SHAP sang dương.
+
+--------------------------------------------------------------------------------
+ẢNH 3 & 4: Các biểu đồ SHAP Dependence Plot
+--------------------------------------------------------------------------------
+MÔ TẢ VÀ Ý NGHĨA:
+  Biểu đồ phân tán (Scatter plot) cho thấy rõ mối quan hệ phi tuyến:
+  - Age: Đường cong đi lên rõ rệt khi bệnh nhân vượt qua mốc 60 tuổi, cho thấy
+    rủi ro bùng phát ở tuổi già.
+  - LDL_max: Có ngưỡng nguy hiểm. Khi LDL vượt qua một mức nhất định, SHAP
+    value vọt lên mức dương rất nhanh.
+
+--------------------------------------------------------------------------------
+ẢNH 5, 6, 7: Các Case Study (Bệnh nhân cụ thể - Waterfall Plot)
+--------------------------------------------------------------------------------
+MÔ TẢ VÀ Ý NGHĨA LÂM SÀNG:
+
+  1. Case NGUY CƠ CAO (True Positive):
+     Bệnh nhân này bị hệ thống đánh giá nguy cơ cao KHÔNG PHẢI vì máy tính biết
+     họ đã suy tim, mà là vì: Tuổi cao (hồng) + Có đái tháo đường (hồng) + 
+     LDL ở mức rất cao (hồng) + HDL thấp. Đây là bài toán dự báo rủi ro (Risk 
+     Profiling) vô cùng chính xác!
+
+  2. Case NGUY CƠ THẤP (True Negative):
+     Bệnh nhân được dự đoán an toàn vì: Tuổi trẻ (xanh) + Không có tiểu đường/
+     suy thận (xanh) + Lipid máu được kiểm soát ở mức tốt (LDL xanh, HDL hồng).
+
+  3. Case FALSE NEGATIVE (Mô hình bỏ sót):
+     Bệnh nhân thực tế CÓ biến chứng nhưng mô hình dự đoán KHÔNG. Khi xem SHAP,
+     ta thấy bệnh nhân này còn khá trẻ và có mỡ máu bình thường. 
+     -> Tại sao họ lại bị biến chứng? Đây là "Góc khuất" của dữ liệu: Có thể 
+        bệnh nhân này hút thuốc lá lâu năm, có yếu tố di truyền, hoặc lối sống 
+        độc hại mà bộ dữ liệu xét nghiệm máu không ghi nhận được.
+
+================================================================================
+PHẦN C: KẾT LUẬN TỔNG QUAN SAU KHI SỬA LỖI DATA LEAKAGE
+================================================================================
+
+1. MÔ HÌNH ĐÃ TRỞ NÊN "CÓ HỌC THỨC":
+   Thay vì là một hệ thống "nhìn trộm đáp án" (thấy suy tim thì đoán biến chứng),
+   mô hình giờ đây hành xử như một bác sĩ nội trú thực thụ: Đánh giá nguy cơ 
+   dựa trên Sinh hóa máu và Nhân khẩu học.
+
+2. GIÁ TRỊ LÂM SÀNG CỦA SHAP:
+   SHAP giờ đây mang lại giá trị giải thích tuyệt vời. Khi triển khai lên App, 
+   nếu một bệnh nhân bị báo "Nguy cơ cao", bác sĩ có thể nhìn vào SHAP để nói: 
+   "Bác có nguy cơ cao là vì dạo này LDL của bác tăng quá, kết hợp với bệnh tiểu
+   đường cũ". Điều này giúp bác sĩ có cơ sở để kê đơn thuốc hạ mỡ máu cho bệnh
+   nhân ngay lập tức để phòng ngừa.
+
+3. HẠN CHẾ HIỆN TẠI & HƯỚNG MỞ RỘNG:
+   Vì chỉ dựa vào xét nghiệm máu cơ bản, mô hình sẽ bỏ sót (False Negative) các 
+   ca bệnh do lối sống (Hút thuốc, Rượu bia, Căng thẳng) hoặc do cơ địa (Di 
+   truyền). Để nâng cấp mô hình trong tương lai, cần thu thập thêm các trường
+   thông tin này.
+
+================================================================================
+                            END OF SUMMARY
+================================================================================

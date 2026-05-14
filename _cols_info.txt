@@ -1,0 +1,59 @@
+Shape: (12355, 31)
+Columns: ['GioiTinh', 'HBa1C_mean', 'HBa1C_max', 'HBa1C_min', 'HBa1C_std', 'HBa1C_last', 'LDL_mean', 'LDL_max', 'LDL_min', 'LDL_std', 'LDL_last', 'HDL_mean', 'HDL_max', 'HDL_min', 'HDL_std', 'HDL_last', 'Triglycerid_mean', 'Triglycerid_max', 'Triglycerid_min', 'Triglycerid_std', 'Triglycerid_last', 'Age', 'Target', 'dai_thao_duong', 'rl_lipid_mau', 'suy_than_man', 'benh_mach_vanh', 'suy_tim', 'dot_quy', 'rung_nhi', 'Tang_huyet_ap']
+
+Dtypes:
+GioiTinh             object
+HBa1C_mean          float64
+HBa1C_max           float64
+HBa1C_min           float64
+HBa1C_std           float64
+HBa1C_last          float64
+LDL_mean            float64
+LDL_max             float64
+LDL_min             float64
+LDL_std             float64
+LDL_last            float64
+HDL_mean            float64
+HDL_max             float64
+HDL_min             float64
+HDL_std             float64
+HDL_last            float64
+Triglycerid_mean    float64
+Triglycerid_max     float64
+Triglycerid_min     float64
+Triglycerid_std     float64
+Triglycerid_last    float64
+Age                   int64
+Target                int64
+dai_thao_duong        int64
+rl_lipid_mau          int64
+suy_than_man          int64
+benh_mach_vanh        int64
+suy_tim               int64
+dot_quy               int64
+rung_nhi              int64
+Tang_huyet_ap         int64
+dtype: object
+
+Target value counts:
+Target
+0    11721
+1      634
+Name: count, dtype: int64
+
+Describe:
+        HBa1C_mean    HBa1C_max    HBa1C_min    HBa1C_std   HBa1C_last      LDL_mean       LDL_max       LDL_min       LDL_std      LDL_last      HDL_mean       HDL_max       HDL_min       HDL_std      HDL_last  Triglycerid_mean  Triglycerid_max  Triglycerid_min  Triglycerid_std  Triglycerid_last           Age        Target  dai_thao_duong  rl_lipid_mau  suy_than_man  benh_mach_vanh       suy_tim       dot_quy      rung_nhi  Tang_huyet_ap
+count  8879.000000  8879.000000  8879.000000  8879.000000  8879.000000  12349.000000  12349.000000  12349.000000  12349.000000  12349.000000  12349.000000  12349.000000  12349.000000  12349.000000  12349.000000      12355.000000     12355.000000     12355.000000     12355.000000      12355.000000  12355.000000  12355.000000    12355.000000  12355.000000  12355.000000    12355.000000  12355.000000  12355.000000  12355.000000        12355.0
+mean      6.636786     7.047941     6.327757     0.282205     6.612728      2.726850      3.579124      1.936287      0.635743      2.526110      1.262852      1.418479      1.114736      0.115823      1.294356          1.871180         2.748682         1.241086         0.575498          1.728299     77.031890      0.051315        0.299636      0.152408      0.048078        0.001133      0.036180      0.013112      0.009308            1.0
+std       0.939427     1.498042     0.668113     0.427926     1.004577      0.841564      0.994635      0.880649      0.346157      1.026442      0.275500      0.319643      0.264683      0.067398      0.313933          1.003152         1.929897         0.619093         0.606839          1.115114      7.919813      0.220649        0.458117      0.359430      0.213939        0.033644      0.186745      0.113759      0.096032            0.0
+min       4.900000     4.900000     4.600000     0.000000     4.600000      0.388333      0.540000      0.000000      0.000000      0.000000      0.370000      0.490000      0.250000      0.000000      0.250000          0.315714         0.410000         0.040000         0.000000          0.270000     37.000000      0.000000        0.000000      0.000000      0.000000        0.000000      0.000000      0.000000      0.000000            1.0
+25%       6.025000     6.100000     5.900000     0.000000     6.000000      2.122000      2.910000      1.280000      0.374767      1.740000      1.066667      1.190000      0.930000      0.073046      1.070000          1.226667         1.620000         0.840000         0.244310          1.050000     72.000000      0.000000        0.000000      0.000000      0.000000        0.000000      0.000000      0.000000      0.000000            1.0
+50%       6.374194     6.500000     6.200000     0.141421     6.300000      2.670000      3.550000      1.790000      0.597679      2.430000      1.230000      1.380000      1.080000      0.104259      1.260000          1.636667         2.260000         1.100000         0.407277          1.450000     77.000000      0.000000        0.000000      0.000000      0.000000        0.000000      0.000000      0.000000      0.000000            1.0
+75%       6.983333     7.500000     6.600000     0.354373     6.900000      3.283333      4.200000      2.490000      0.843289      3.210000      1.422000      1.600000      1.270000      0.144338      1.480000          2.226250         3.250000         1.470000         0.689874          2.070000     83.000000      0.000000        1.000000      0.000000      0.000000        0.000000      0.000000      0.000000      0.000000            1.0
+max      16.300000    17.600000    16.300000     5.515433    17.100000      7.637778      9.720000      6.140000      3.606245      7.600000      2.938333      3.810000      2.570000      1.111947      2.860000         15.483333        26.140000        12.970000         9.329390         18.330000    106.000000      1.000000        1.000000      1.000000      1.000000        1.000000      1.000000      1.000000      1.000000            1.0
+
+Head 3:
+  GioiTinh  HBa1C_mean  HBa1C_max  HBa1C_min  HBa1C_std  HBa1C_last  LDL_mean  LDL_max  LDL_min   LDL_std  LDL_last  HDL_mean  HDL_max  HDL_min   HDL_std  HDL_last  Triglycerid_mean  Triglycerid_max  Triglycerid_min  Triglycerid_std  Triglycerid_last  Age  Target  dai_thao_duong  rl_lipid_mau  suy_than_man  benh_mach_vanh  suy_tim  dot_quy  rung_nhi  Tang_huyet_ap
+0      Nam    6.566667       6.80        6.4   0.208167        6.40  2.433333     3.57     1.59  1.022073      1.59  0.970000     1.10     0.84  0.130000      0.84          3.773333             4.11             3.38         0.368284              3.83   92       0               0             0             0               0        0        0         0              1
+1      Nam    8.567500       9.27        7.8   0.684270        9.27  1.120000     1.97     0.38  0.718853      0.38  0.798000     0.98     0.62  0.136088      0.72          2.230000             3.14             1.12         0.982293              3.14   93       1               1             0             0               0        1        0         0              1
+2      Nam    6.300000       6.30        6.3   0.000000        6.30  3.340000     4.06     2.89  0.384249      2.90  1.566667     2.11     1.37  0.158819      2.11          1.106111             1.68             0.74         0.345154              1.16   89       0               0             1             0               0        0        0         0              1

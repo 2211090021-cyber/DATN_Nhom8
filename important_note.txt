@@ -1,0 +1,306 @@
+================================================================================
+ LƯU Ý QUAN TRỌNG THEO TỪNG BƯỚC - DỰ ÁN ML DỰ ĐOÁN BIẾN CHỨNG TIM MẠCH
+ (Tổng hợp từ quá trình thảo luận và phát triển dự án)
+================================================================================
+
+================================================================================
+STEP 0: CẤU TRÚC PIPELINE TỔNG QUAN
+================================================================================
+
+Thứ tự thực hiện các bước (Pipeline chuẩn mực):
+
+    1. clean_data.py          → Làm sạch dữ liệu gốc, lọc IQR, tổng hợp đặc trưng
+    2. EDA_data_v2.py         → Phân tích khám phá trên dữ liệu đã tổng hợp (CHƯA scale)
+    3. preprocess.py          → Chia Train/Test, Imputation, Chuẩn hóa, SMOTE
+    4. train_models.py        → Huấn luyện và đánh giá mô hình
+    5. explain_shap.py        → Giải thích mô hình bằng SHAP
+    6. app.py                 → Giao diện Streamlit demo
+
+Tất cả script đều nhận đường dẫn file qua tham số dòng lệnh (argparse),
+không hardcode path trực tiếp trong code.
+
+================================================================================
+STEP 1: LÀM SẠCH DỮ LIỆU GỐC (clean_data.py)
+================================================================================
+
+Nguồn dữ liệu:
+  - Dữ liệu thô từ nhiều sheet riêng lẻ (HBa1C, LDL, HDL, Triglycerid).
+  - Mỗi sheet có nhiều dòng trên từng bệnh nhân (nhiều lần đo xét nghiệm).
+
+Lý do cần bước này TRƯỚC khi tính mean/min/max:
+  - Các mô hình ML yêu cầu đầu vào dạng bảng tĩnh: 1 bệnh nhân = 1 dòng.
+  - Cần "tóm tắt lịch sử" bệnh nhân qua các thống kê (mean, max, min, std, last).
+  - Ý nghĩa lâm sàng: max (từng tệ nhất), last (gần đây nhất), std (mức độ dao động).
+
+[!] LƯU Ý 1 - Lọc ngoại lai (IQR) TRÊN DỮ LIỆU GỐC (RAW):
+  - Phải thực hiện IQR TRƯỚC khi groupby/tổng hợp.
+  - Lý do: Nếu bỏ qua, một giá trị lỗi nhập liệu (vd: HBa1C = 750 thay vì 7.5)
+    sẽ làm hỏng hoàn toàn giá trị mean, max, std của bệnh nhân đó.
+  - Cách xử lý ở bước này: GÁN BẰNG NaN (không phải Capping).
+  - Lý do dùng NaN thay vì Capping:
+    * Nếu Capping: biến giá trị sai thành "bệnh nặng giả tạo" → làm lệch mean.
+    * Nếu NaN: pandas .groupby() tự bỏ qua, chỉ tính từ các lần đo hợp lệ.
+
+[!] LƯU Ý 2 - Xử lý std = NaN cho bệnh nhân chỉ đo 1 lần:
+  - Bệnh nhân chỉ đo 1 lần → std = NaN (không tính được độ lệch chuẩn).
+  - Xử lý: Gán std = 0.0 NẾU có giá trị mean (đã đo ít nhất 1 lần).
+  - KHÔNG gán 0 nếu mean cũng là NaN (chưa từng đo).
+  - Code: mask = df[mean_col].notnull() & df[std_col].isnull()
+
+[!] LƯU Ý 3 - Tiêu chí lọc bệnh nhân hợp lệ:
+  - Tuổi >= 18 (tính theo năm 2026).
+  - Thời gian theo dõi >= 365 ngày (min/max ngày xét nghiệm).
+  - Có chẩn đoán tăng huyết áp (ICD I10-I15).
+  - Loại trừ bệnh nhân ung thư (ICD Cxx) để tránh confounding.
+  - Giữ lại bệnh nhân có ÍT NHẤT 1 loại xét nghiệm (thresh=1).
+
+Lệnh chạy:
+  python clean_data.py --input docs/YCDL.xlsx --output data/preprocess/YCDL_Features_Mapped.xlsx
+
+================================================================================
+STEP 2: PHÂN TÍCH KHÁM PHÁ DỮ LIỆU - EDA (EDA_data_v2.py)
+================================================================================
+
+[!] LƯU Ý 1 - Thực hiện trên dữ liệu NÀO?
+  - Input: data/preprocess/YCDL_Features_Mapped.xlsx (output của clean_data.py).
+  - Dữ liệu đã gom nhóm (1 bệnh nhân/dòng), CHƯA qua Scale, CHƯA qua SMOTE.
+  - KHÔNG làm EDA trên dữ liệu gốc nhiều dòng (bị bias về bệnh nhân khám nhiều).
+  - KHÔNG làm EDA sau preprocess.py (dữ liệu đã bị biến dạng bởi Scaler/SMOTE).
+
+[!] LƯU Ý 2 - Tại sao không dùng dữ liệu sau preprocess?
+  - StandardScaler: biến HBa1C = 7.5 thành z-score = 0.15 → vô nghĩa y khoa.
+  - SMOTE: tạo ra "bệnh nhân giả" → làm sai lệch mọi tỷ lệ thống kê.
+  - Imputation: che giấu phân phối tự nhiên và tỷ lệ dữ liệu thiếu thực tế.
+
+[!] LƯU Ý 3 - Xử lý missing khi tính thống kê trong EDA:
+  - Pandas .corr() và các kiểm định thống kê tự động bỏ qua NaN (pairwise deletion).
+  - Đây là phương pháp ĐÚNG ở giai đoạn EDA vì phản ánh thực tế của dữ liệu.
+
+[!] LƯU Ý 4 - Mã hóa GioiTinh khi đọc file vào EDA:
+  - File có thể chứa cả "Nam", "Nữ" (có dấu) hoặc "Nu" (không dấu).
+  - Dùng .replace() thay vì .map() để xử lý cả 2 trường hợp, tránh NaN oan.
+  - Code: df["GioiTinh"] = df["GioiTinh"].replace({"Nam": 1, "Nữ": 0, "Nu": 0})
+
+[!] LƯU Ý 5 - Kết quả EDA hữu ích cho báo cáo:
+  - Các biểu đồ và CSV từ bước này có thể dùng TRỰC TIẾP trong báo cáo đồ án.
+  - Dữ liệu vẫn ở dạng đơn vị y khoa thực (HBa1C %, LDL mmol/L...).
+
+Lệnh chạy:
+  python EDA_data_v2.py --input data/preprocess/YCDL_Features_Mapped.xlsx --output_dir outputs
+
+================================================================================
+STEP 3: TIỀN XỬ LÝ CHUẨN BỊ CHO MÔ HÌNH (preprocess.py)
+================================================================================
+
+[!] LƯU Ý 1 - Thứ tự bắt buộc: CHIA Train/Test TRƯỚC MỌI THỨ KHÁC:
+  - Quy tắc vàng: Chia tập Train/Test TRƯỚC khi tính Median để Impute, trước khi fit Scaler.
+  - Lý do: Nếu tính Median trên toàn bộ dữ liệu → thông tin tập Test rò rỉ vào Train
+    → Kết quả đánh giá mô hình bị ảo tưởng (Data Leakage).
+
+[!] LƯU Ý 2 - Xử lý giá trị thiếu (Missing Values) PHẢI SAU khi chia Train/Test:
+  - Chỉ FIT SimpleImputer (tính Median) trên tập TRAIN.
+  - Sau đó TRANSFORM (áp dụng) lên cả Train VÀ Test.
+  - Lý do: Nếu điền thiếu ở dữ liệu gốc trước khi groupby → làm sai std
+    (bệnh nhân chưa từng đo sẽ có std = 0 thay vì NaN, gây hiểu nhầm nghiêm trọng).
+
+[!] LƯU Ý 3 - Capping (Winsorization) ở bước này KHÁC với NaN ở clean_data.py:
+  - Ở clean_data.py: NaN để loại bỏ LỖI nhập liệu (giá trị vô lý).
+  - Ở preprocess.py: Capping để xử lý các giá trị "thật nhưng cực đoan" trên đặc trưng
+    tổng hợp (HBa1C_mean = 14.0 là thật nhưng có thể gây bias cho mô hình).
+  - Capping cũng chỉ được FIT trên tập TRAIN, áp dụng lên cả Train VÀ Test.
+
+[!] LƯU Ý 4 - StandardScaler PHẢI SAU khi chia Train/Test:
+  - FIT scaler chỉ trên tập TRAIN.
+  - TRANSFORM lên cả Train VÀ Test.
+
+[!] LƯU Ý 5 - SMOTE chỉ áp dụng trên tập TRAIN:
+  - TUYỆT ĐỐI không áp dụng SMOTE lên tập Test.
+  - Lý do: SMOTE tạo bệnh nhân giả → nếu test trên dữ liệu giả → kết quả không phản ánh
+    hiệu suất thực của mô hình trên bệnh nhân thật.
+  - Kết hợp với Stratified K-Fold CV để đảm bảo phân phối nhãn trong mỗi fold.
+
+Thứ tự các bước trong preprocess.py (chuẩn):
+  1. Load dữ liệu đã tổng hợp (Features_Mapped.xlsx)
+  2. Loại bỏ cột định danh (ID_COLUMNS)
+  3. Chia Train/Test (stratified, 80/20)
+  4. Loại bỏ cột thiếu > 60% (dựa trên tỷ lệ missing của TẬP TRAIN)
+  5. Label Encode GioiTinh (fit trên Train)
+  6. Imputation Median cho biến liên tục (fit trên Train)
+  7. Imputation Mode cho biến nhị phân (fit trên Train)
+  8. IQR Capping (fit trên Train)
+  9. StandardScaler (fit trên Train)
+  10. SMOTE (chỉ trên Train)
+  11. Lưu artifacts (pipeline.pkl) và file CSV
+
+Lệnh chạy:
+  python preprocess.py --input data/preprocess/YCDL_Features_Mapped.xlsx --output_dir data/processed --model_dir models
+
+================================================================================
+STEP 4: HUẤN LUYỆN MÔ HÌNH (train_models.py)
+================================================================================
+
+[!] LƯU Ý 1 - Feature Selection dựa trên EDA:
+  - Đọc file statistical_summary.csv từ EDA để loại bỏ các biến không có ý nghĩa
+    thống kê (p-value >= 0.05).
+  - Tang_huyet_ap: Zero-variance (mọi bệnh nhân đều = 1 vì đây là tiêu chí lọc)
+    → PHẢI loại bỏ khỏi features.
+  - Lưu selected_features.json để Streamlit App có thể đồng bộ danh sách features.
+
+[!] LƯU Ý 2 - Chỉ số đánh giá ưu tiên (Đã cập nhật):
+  - TRƯỚC ĐÂY: Dùng RECALL làm tiêu chí ưu tiên tuyệt đối.
+  - VẤN ĐỀ: Trong tập dữ liệu mất cân bằng nặng, chỉ tối ưu Recall khiến mô hình
+    (đặc biệt là Logistic Regression) dự đoán "bừa" mọi ca là Có biến chứng để 
+    vét ca bệnh, dẫn đến còi báo động giả (False Positive) quá lớn.
+  - HIỆN TẠI (CHÍNH THỨC): PRIMARY METRIC = F1-SCORE. F1-Score giúp cân bằng giữa 
+    độ nhạy (Recall - tìm bệnh) và độ chính xác (Precision - không báo nhầm). 
+    Sử dụng scoring="f1" trong GridSearchCV và dùng F1 làm tiêu chí chọn Champion.
+
+[!] LƯU Ý 3 - Khắc phục Target Leakage (Rò rỉ Dữ liệu):
+  - LỖI TRƯỚC ĐÂY: Các biến `suy_tim`, `dot_quy`, `rung_nhi` được đưa vào làm tính 
+    năng dự báo. Vì những biến này bản chất là chính "Biến chứng", mô hình đạt AUC
+    > 0.98 nhưng vô giá trị trong dự báo sớm.
+  - GIẢI PHÁP: XÓA hoàn toàn 3 biến này khỏi toàn bộ pipeline (từ clean_data.py 
+    đến app.py).
+  - HỆ QUẢ: AUC giảm xuống ~0.65. Đây là mức RẤT TRUNG THỰC và CÓ GIÁ TRỊ THỰC TẾ 
+    khi chỉ dùng xét nghiệm Sinh hóa máu và Tuổi tác để cảnh báo sớm.
+
+[!] LƯU Ý 4 - Xử lý mất cân bằng nhãn trong huấn luyện:
+  - Logistic Regression & Random Forest: class_weight="balanced"
+  - XGBoost: scale_pos_weight = n_negative / n_positive
+  - Kết hợp với SMOTE từ bước preprocess → double protection.
+
+[!] LƯU Ý 5 - Tránh Data Leakage trong CV:
+  - Sử dụng StratifiedKFold để đảm bảo tỷ lệ nhãn trong mỗi fold.
+  - GridSearchCV với refit=True sẽ fit lại trên toàn bộ tập Train với best params.
+
+Lệnh chạy:
+  python train_models.py
+
+================================================================================
+STEP 5: GIẢI THÍCH MÔ HÌNH - SHAP (explain_shap.py)
+================================================================================
+
+[!] LƯU Ý 1 - Luôn kích hoạt môi trường ảo trước khi chạy:
+  - Lỗi thường gặp: ModuleNotFoundError do chưa activate myEnv.
+  - Lệnh: .\myEnv\Scripts\activate
+
+[!] LƯU Ý 2 - Sử dụng SHAP TreeExplainer cho XGBoost:
+  - TreeExplainer nhanh hơn nhiều so với KernelExplainer.
+  - Áp dụng trên tập TEST (dữ liệu thật, chưa qua SMOTE).
+
+[!] LƯU Ý 3 - Case Studies minh họa:
+  - High Risk: Bệnh nhân thật có biến chứng + model dự đoán đúng (prob cao).
+  - Low Risk: Bệnh nhân thật không biến chứng + model dự đoán đúng (prob thấp).
+  - False Negative: Bệnh nhân thật có biến chứng nhưng model bỏ sót → quan trọng
+    để phân tích điểm yếu của mô hình trong báo cáo.
+
+Lệnh chạy:
+  python explain_shap.py
+
+================================================================================
+STEP 6: GIAO DIỆN STREAMLIT APP (app.py)
+================================================================================
+
+[!] LƯU Ý 1 - Bug trong compute_features (đã sửa):
+  - Bug cũ: Thiếu HDL_max, Triglycerid_max, Triglycerid_std trong feat dict.
+  - Hệ quả: Nếu model yêu cầu những cột này, Pandas sẽ gán NaN → dự đoán sai.
+  - Cách phát hiện: So sánh SELECTED_FEATURES với danh sách key trong feat dict.
+  - Nguyên tắc: feat dict PHẢI chứa TẤT CẢ các cột trong SELECTED_FEATURES.
+
+[!] LƯU Ý 2 - Đồng bộ với Pipeline:
+  - App tự động đọc selected_features.json → không cần hardcode tên cột.
+  - App tự động đọc preprocessing_pipeline.pkl để lấy iqr_bounds và scaler params.
+  - Khi chạy lại train_models.py (cập nhật model), app sẽ tự cập nhật theo.
+
+[!] LƯU Ý 3 - Quy trình xử lý khi nhập liệu bệnh nhân mới:
+  1. Tính toán features tổng hợp từ lịch sử khám + lần khám mới.
+  2. Áp dụng IQR Capping (dùng iqr_bounds từ pipeline.pkl).
+  3. Áp dụng StandardScaler (dùng mean/scale từ pipeline.pkl).
+  4. Chạy predict_proba với Champion Model.
+  5. Tính SHAP values để giải thích kết quả.
+  → Quy trình này phải GIỐNG HOÀN TOÀN với quy trình trong preprocess.py.
+
+[!] LƯU Ý 4 - GioiTinh trong App:
+  - User chọn "Nam"/"Nữ" → convert sang 1/0 trước khi đưa vào model.
+  - Nhất quán với cách encode trong preprocess.py.
+
+Lệnh chạy:
+  streamlit run app.py --server.port 3636
+
+================================================================================
+TỔNG KẾT: NGUYÊN TẮC CỐT LÕI TRÁNH DATA LEAKAGE
+================================================================================
+
+  1. IQR (loại lỗi nhập liệu)     → Dữ liệu gốc RAW (clean_data.py)
+  2. EDA / Phân tích thống kê     → Dữ liệu đã tổng hợp, CHƯA scale (EDA_data_v2.py)
+  3. Chia Train/Test               → TRƯỚC TẤT CẢ CÁC BƯỚC TIẾP THEO
+  4. Xử lý Missing (Imputation)   → Fit trên TRAIN, Transform cả Train+Test
+  5. IQR Capping                   → Fit trên TRAIN, Transform cả Train+Test
+  6. StandardScaler                → Fit trên TRAIN, Transform cả Train+Test
+  7. SMOTE                         → CHỈ trên TRAIN
+  8. Đánh giá mô hình              → CHỈ trên TEST (dữ liệu gốc, không qua SMOTE)
+
+================================================================================
+PHỤ LỤC: PHÁT HIỆN QUAN TRỌNG — "NGHỊCH LÝ ĐIỀU TRỊ" (Treatment Paradox)
+Ngày phát hiện: 2026-05-04 (qua thực nghiệm trực tiếp với App & Model)
+================================================================================
+
+[!] PHÁT HIỆN: Tương quan SHAP của biến bệnh nền là ÂM (phản trực giác):
+  Từ phân tích SHAP thực tế trên tập test:
+    - rl_lipid_mau:   SHAP correlation = -0.986  (Có bệnh → GIẢM nguy cơ dự đoán)
+    - dai_thao_duong: SHAP correlation = -0.964  (Tương tự!)
+    - suy_than_man:   SHAP correlation = -0.942  (Tương tự!)
+    - GioiTinh:       SHAP correlation = -0.957
+  Trong khi đó:
+    - Age:    SHAP correlation = +0.748  (Tuổi càng cao → nguy cơ càng lớn)
+    - LDL_max: SHAP correlation = +0.699 (LDL_max cao → nguy cơ lớn)
+
+[!] GIẢI THÍCH: Nguyên nhân là "Healthy User Bias" / "Compliance Paradox":
+  Bệnh nhân ĐÃ ĐƯỢC CHẨN ĐOÁN đái tháo đường hoặc rối loạn lipid máu thường:
+    1. Được kê thuốc điều trị (Statin, Metformin) → mỡ máu được kiểm soát tốt.
+    2. Được theo dõi định kỳ chặt chẽ hơn → phòng ngừa chủ động.
+  → Nhóm này có TỶ LỆ BIẾN CHỨNG THỰC TẾ THẤP HƠN trong dữ liệu lịch sử.
+  → Mô hình XGBoost đã học được pattern này và "thưởng" cho bệnh nhân có bệnh nền.
+  → Đây là một bias hệ thống trong dữ liệu hồi cứu (retrospective data), KHÔNG
+    phải lỗi của thuật toán.
+
+[!] HỆ QUẢ ĐỐI VỚI DEMO APP:
+  - Bệnh nhân nhập vào có suy thận mạn/đái tháo đường sẽ nhận được nguy cơ THẤP
+    hơn so với kỳ vọng lâm sàng thông thường.
+  - Yếu tố dự báo MẠNH NHẤT của mô hình hiện tại là TUỔI TÁC (Age), đặc biệt
+    khi bệnh nhân không có hồ sơ bệnh nền nào được ghi nhận (tức là có thể
+    chưa được chẩn đoán/điều trị).
+
+[!] DỮ LIỆU MẪU ĐÃ KIỂM CHỨNG (từ tập test thực tế, xác nhận bằng code):
+
+  CA NGUY CƠ CAO (Dự đoán: 89.9% — lấy từ test set idx=824):
+    Mã bệnh nhân : BN_HIGH
+    Năm sinh     : 1930  (96 tuổi)
+    Giới tính    : Nữ (0)
+    Đái tháo đường: Không (0)
+    Suy thận mạn  : Không (0)
+    Rối loạn lipid: Không (0)
+    LDL          : ~1.8 mmol/L  (giá trị bình thường — nhưng tuổi quyết định tất cả)
+    HDL          : ~0.68 mmol/L
+    Triglycerid  : ~1.12 mmol/L
+
+  CA NGUY CƠ THẤP (Dự đoán: 0.2% — lấy từ test set idx=0):
+    Mã bệnh nhân : BN_LOW
+    Năm sinh     : 1947  (79 tuổi — tuổi thấp hơn đóng vai trò bảo vệ chính)
+    Giới tính    : Nam (1)
+    Đái tháo đường: Không (0)
+    Suy thận mạn  : Không (0)
+    Rối loạn lipid: Không (0)
+    LDL          : ~0.70 mmol/L
+    HDL          : ~0.87 mmol/L
+    Triglycerid  : ~2.68 mmol/L
+
+[!] LƯU Ý CHO BÁO CÁO ĐỒ ÁN:
+  - Nêu rõ "Treatment Paradox" / "Healthy User Bias" trong phần Hạn chế nghiên cứu.
+  - Đề xuất hướng khắc phục: Thu thập thêm dữ liệu về lịch sử dùng thuốc (Statin,
+    Metformin) để mô hình có thể phân biệt "bệnh nhân được điều trị" vs "bệnh nhân
+    chưa được phát hiện bệnh".
+
+================================================================================
+Được tổng hợp ngày: 2026-05-04 | Dự án: ML Dự đoán Biến chứng Tim mạch - EMR
+================================================================================

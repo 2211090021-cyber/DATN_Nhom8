@@ -1,0 +1,12 @@
+{
+  "champion": "XGBoost",
+  "metrics": {
+    "Model": "XGBoost",
+    "Accuracy": 0.8733,
+    "Precision": 0.128,
+    "Recall": 0.252,
+    "F1-Score": 0.1698,
+    "ROC-AUC": 0.6504,
+    "Brier": 0.094
+  }
+}

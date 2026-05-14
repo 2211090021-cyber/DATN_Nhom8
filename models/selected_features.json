@@ -1,0 +1,19 @@
+[
+  "GioiTinh",
+  "LDL_mean",
+  "LDL_max",
+  "LDL_min",
+  "LDL_std",
+  "LDL_last",
+  "HDL_mean",
+  "HDL_min",
+  "HDL_std",
+  "Triglycerid_mean",
+  "Triglycerid_max",
+  "Triglycerid_min",
+  "Triglycerid_last",
+  "Age",
+  "dai_thao_duong",
+  "rl_lipid_mau",
+  "suy_than_man"
+]

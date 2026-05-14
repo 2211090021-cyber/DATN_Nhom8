@@ -1,0 +1,27 @@
+﻿Feature,OriginalCol,Type,Normal,Test,Statistic,p-value,Significant,Mean_Group0,Mean_Group1,Median_Group0,Median_Group1
+HBa1C mean,HBa1C_mean,Continuous,False,Mann-Whitney U,1935313.0,0.537963,False,6.5575,6.5459,6.3667,6.3944
+HBa1C max,HBa1C_max,Continuous,False,Mann-Whitney U,1919790.0,0.746802,False,6.8493,6.8269,6.5,6.5
+HBa1C min,HBa1C_min,Continuous,False,Mann-Whitney U,1943629.5,0.438538,False,6.3065,6.3077,6.2,6.2
+HBa1C std,HBa1C_std,Continuous,False,Mann-Whitney U,1911131.5,0.871884,False,0.2167,0.2188,0.1414,0.1414
+HBa1C last,HBa1C_last,Continuous,False,Mann-Whitney U,1944088.0,0.433815,False,6.5457,6.5445,6.3,6.3
+LDL mean,LDL_mean,Continuous,False,Mann-Whitney U,4310313.5,0.0,True,2.7111,2.5003,2.6725,2.414
+LDL max,LDL_max,Continuous,False,Mann-Whitney U,4040833.0,0.000114,True,3.5188,3.3812,3.54,3.41
+LDL min,LDL_min,Continuous,False,Mann-Whitney U,4360375.5,0.0,True,1.9486,1.7005,1.81,1.52
+LDL std,LDL_std,Continuous,False,Mann-Whitney U,3475502.5,0.008838,True,0.6116,0.6428,0.5825,0.6222
+LDL last,LDL_last,Continuous,False,Mann-Whitney U,4162271.0,0.0,True,2.5239,2.3233,2.44,2.22
+HDL mean,HDL_mean,Continuous,False,Mann-Whitney U,3838536.5,0.018415,True,1.2471,1.2227,1.2267,1.2038
+HDL max,HDL_max,Continuous,False,Mann-Whitney U,3691855.0,0.513784,False,1.3861,1.3794,1.37,1.37
+HDL min,HDL_min,Continuous,False,Mann-Whitney U,4024178.0,6e-06,True,1.1117,1.0659,1.08,1.03
+HDL std,HDL_std,Continuous,False,Mann-Whitney U,3163382.5,0.0,True,0.106,0.1201,0.099,0.1114
+HDL last,HDL_last,Continuous,False,Mann-Whitney U,3798282.5,0.058814,False,1.274,1.2541,1.26,1.22
+Triglycerid mean,Triglycerid_mean,Continuous,False,Mann-Whitney U,4022062.5,7.5e-05,True,1.6801,1.5822,1.61,1.4957
+Triglycerid max,Triglycerid_max,Continuous,False,Mann-Whitney U,3890441.5,0.014574,True,2.2253,2.147,2.2,2.06
+Triglycerid min,Triglycerid_min,Continuous,False,Mann-Whitney U,4141632.5,0.0,True,1.2199,1.1039,1.1,1.01
+Triglycerid std,Triglycerid_std,Continuous,False,Mann-Whitney U,3605405.0,0.397967,False,0.3976,0.4026,0.3608,0.3696
+Triglycerid last,Triglycerid_last,Continuous,False,Mann-Whitney U,4053272.5,1.6e-05,True,1.5969,1.4814,1.44,1.32
+Age,Age,Continuous,False,Mann-Whitney U,2747143.5,0.0,True,76.8397,80.5852,77.0,81.0
+Giới tính,GioiTinh,Categorical,N/A,Chi-square,19.2361,1.2e-05,True,N/A,N/A,N/A,N/A
+Đái tháo đường,dai_thao_duong,Categorical,N/A,Chi-square,17.8522,2.4e-05,True,N/A,N/A,N/A,N/A
+Rối loạn lipid máu,rl_lipid_mau,Categorical,N/A,Chi-square,28.5843,0.0,True,N/A,N/A,N/A,N/A
+Suy thận mạn,suy_than_man,Categorical,N/A,Chi-square,9.3218,0.002264,True,N/A,N/A,N/A,N/A
+Bệnh mạch vành,benh_mach_vanh,Categorical,N/A,Chi-square,0.0,1.0,False,N/A,N/A,N/A,N/A
