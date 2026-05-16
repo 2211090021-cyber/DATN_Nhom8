@@ -121,18 +121,104 @@ def preprocess(df_raw):
 def predict_risk(df_proc):
     return float(model.predict_proba(df_proc)[:,1][0])
 
-def shap_waterfall(df_proc):
-    sv = explainer(df_proc)
-    fig, _ = plt.subplots(figsize=(8,6))
+def compute_shap(df_proc):
+    return explainer(df_proc)
+
+def shap_waterfall(sv):
+    fig, _ = plt.subplots(figsize=(8, 6))
     shap.plots.waterfall(sv[0], show=False)
-    fig = plt.gcf(); fig.set_size_inches(9,6); plt.tight_layout()
+    fig = plt.gcf(); fig.set_size_inches(9, 6); plt.tight_layout()
     return fig
 
+# ── 5b. CLINICAL COMMENTARY ──────────────────────────────────────────────
+def _ldl_comment(v):
+    if v > 4.12:   return ("🔴", f"**LDL rất cao** ({v:.1f} mmol/L > 4.1): tăng tích tụ cholesterol trong động mạch, nguy cơ xơ vữa cao")
+    if v > 3.35:   return ("🟠", f"**LDL cao** ({v:.1f} mmol/L > 3.4): cần xem xét thuốc hạ lipid và kiểm soát chế độ ăn")
+    if v > 2.6:    return ("🟡", f"**LDL ranh giới** ({v:.1f} mmol/L > 2.6): cần theo dõi định kỳ, điều chỉnh chế độ ăn")
+    return             ("🟢", f"**LDL kiểm soát tốt** ({v:.1f} mmol/L): trong ngưỡng an toàn")
+
+def _hdl_comment(v):
+    if v < 1.0:    return ("🔴", f"**HDL thấp** ({v:.2f} mmol/L < 1.0): khả năng bảo vệ tim mạch suy giảm nghiêm trọng")
+    if v < 1.3:    return ("🟠", f"**HDL chưa đủ** ({v:.2f} mmol/L): mức lý tưởng > 1.55 mmol/L, nên tăng cường vận động")
+    if v < 1.55:   return ("🟡", f"**HDL chấp nhận được** ({v:.2f} mmol/L): cần duy trì lối sống lành mạnh")
+    return             ("🟢", f"**HDL bảo vệ tốt** ({v:.2f} mmol/L ≥ 1.55): cholesterol tốt ở mức lý tưởng")
+
+def _trig_comment(v):
+    if v > 5.65:   return ("🔴", f"**Triglycerid rất cao** ({v:.1f} mmol/L > 5.65): nguy cơ viêm tụy cấp và bệnh tim nghiêm trọng")
+    if v > 2.26:   return ("🟠", f"**Triglycerid cao** ({v:.1f} mmol/L > 2.26): cần hạn chế đường, rượu và chất béo")
+    if v > 1.7:    return ("🟡", f"**Triglycerid ranh giới** ({v:.1f} mmol/L > 1.7): nên kiểm soát chế độ ăn uống")
+    return             ("🟢", f"**Triglycerid bình thường** ({v:.1f} mmol/L): trong ngưỡng an toàn")
+
+def _age_comment(v):
+    v = int(v)
+    if v >= 75:    return ("🔴", f"**Tuổi rất cao** ({v} tuổi ≥ 75): nhóm nguy cơ tim mạch rất cao theo độ tuổi")
+    if v >= 65:    return ("🟠", f"**Cao tuổi** ({v} tuổi ≥ 65): yếu tố nguy cơ không thể thay đổi, cần kiểm soát các yếu tố khác")
+    if v >= 45:    return ("🟡", f"**Trung niên** ({v} tuổi ≥ 45): nguy cơ bắt đầu tích lũy, cần tầm soát định kỳ")
+    return             ("🟢", f"**Tuổi** ({v} tuổi): yếu tố tuổi chưa phải nguy cơ chính")
+
+_COMOR_META = {
+    "dai_thao_duong": ("🔴", "Đái tháo đường", "làm tổn thương mạch máu và thần kinh, tăng biến chứng tim mạch"),
+    "rl_lipid_mau":   ("🟠", "Rối loạn lipid máu", "ảnh hưởng trực tiếp đến chuyển hóa mỡ và xơ vữa mạch"),
+    "suy_than_man":   ("🔴", "Suy thận mạn", "thận suy làm tăng huyết áp và gánh nặng tim mạch"),
+}
+
+def generate_commentary(df_raw, sv, last_visit=None):
+    """Trả về list (icon, text) theo mức độ đóng góp SHAP, dựa trên ngưỡng lâm sàng."""
+    raw = df_raw.iloc[0].to_dict()
+    shap_dict = dict(zip(sv[0].feature_names, sv[0].values))
+
+    # Gộp các feature cùng nhóm, lấy feature có |SHAP| lớn nhất đại diện
+    GROUP_PREFIXES = [("LDL", "LDL"), ("HDL", "HDL"), ("Triglycerid", "Triglycerid")]
+    SCALAR_FEATS  = ["Age", "dai_thao_duong", "rl_lipid_mau", "suy_than_man"]
+
+    group_best = {}  # group_name -> (feature_name, shap_val)
+    for prefix, gname in GROUP_PREFIXES:
+        candidates = [(f, v) for f, v in shap_dict.items() if f.startswith(prefix)]
+        if candidates:
+            best = max(candidates, key=lambda x: abs(x[1]))
+            group_best[gname] = best
+    for feat in SCALAR_FEATS:
+        if feat in shap_dict:
+            group_best[feat] = (feat, shap_dict[feat])
+
+    # Sắp xếp nhóm theo |SHAP| giảm dần
+    ranked = sorted(group_best.items(), key=lambda x: abs(x[1][1]), reverse=True)
+
+    lines = []
+    for gname, (_, sval) in ranked:
+        if gname == "LDL":
+            v = last_visit["ldl"] if last_visit else raw.get("LDL_last", raw.get("LDL_mean"))
+            if v is not None: lines.append(_ldl_comment(float(v)))
+        elif gname == "HDL":
+            v = last_visit["hdl"] if last_visit else raw.get("HDL_mean")
+            if v is not None: lines.append(_hdl_comment(float(v)))
+        elif gname == "Triglycerid":
+            v = last_visit["trig"] if last_visit else raw.get("Triglycerid_last", raw.get("Triglycerid_mean"))
+            if v is not None: lines.append(_trig_comment(float(v)))
+        elif gname == "Age":
+            v = raw.get("Age")
+            if v is not None: lines.append(_age_comment(float(v)))
+        elif gname in _COMOR_META:
+            if raw.get(gname, 0) == 1:
+                ico, label, detail = _COMOR_META[gname]
+                lines.append((ico, f"**{label}**: {detail}"))
+            # Nếu bệnh nền = 0, không nhận xét
+    return lines[:5]
+
 # ── 6. RENDER PREDICTION RESULTS (reusable) ──────────────────────────────
-def render_results(prob, df_proc, pid):
+def render_results(prob, df_raw, df_proc, pid):
     pct = prob * 100
     st.markdown("---")
-    res_col, shap_col = st.columns([1, 2])
+
+    # Tính SHAP ngầm để ranking — không hiển thị chart
+    sv = None
+    try:
+        sv = compute_shap(df_proc)
+    except Exception:
+        pass
+
+    res_col, comment_col = st.columns([1, 1.6])
+
     with res_col:
         if pct >= 70:
             css, icon, text = "risk-high", "🚨", "NGUY CƠ CAO"
@@ -156,17 +242,22 @@ def render_results(prob, df_proc, pid):
                     st.stop()
             insert_visit(pid, str(v["date"]), v["ldl"], v["hdl"], v["trig"], prob)
             st.success("Đã lưu thành công!")
-            for k in ["last_prob","last_df_proc","last_visit","last_pid","new_patient_info"]:
+            for k in ["last_prob", "last_df_raw", "last_df_proc", "last_visit", "last_pid", "new_patient_info"]:
                 st.session_state.pop(k, None)
             st.rerun()
-    with shap_col:
-        st.markdown("#### 🧠 Giải thích Mô hình (SHAP)")
-        st.caption("Biểu đồ cho thấy yếu tố nào đẩy nguy cơ lên (đỏ) hoặc kéo xuống (xanh).")
-        try:
-            fig = shap_waterfall(df_proc)
-            st.pyplot(fig, use_container_width=True); plt.close(fig)
-        except Exception as e:
-            st.warning(f"Không thể hiển thị SHAP: {e}")
+
+    with comment_col:
+        st.markdown("#### 🩺 Nhận xét Lâm sàng")
+        st.caption("Các chỉ số ảnh hưởng nhiều nhất đến kết quả, so với ngưỡng lâm sàng chuẩn.")
+        if sv is not None:
+            comments = generate_commentary(df_raw, sv, st.session_state.get("last_visit"))
+            if comments:
+                for ico, msg in comments:
+                    st.markdown(f"{ico} &nbsp; {msg}")
+            else:
+                st.info("Tất cả chỉ số trong ngưỡng bình thường.")
+        else:
+            st.info("Không thể tạo nhận xét.")
 
 # ── 7. CUSTOM CSS ─────────────────────────────────────────────────────────
 st.markdown("""<style>
@@ -214,7 +305,7 @@ if btn_search and search_code.strip():
     new_search = search_code.strip()
     if st.session_state.get("searched_code") != new_search:
         # Xóa kết quả dự đoán của bệnh nhân cũ khi tìm bệnh nhân mới
-        for k in ["last_prob", "last_df_proc", "last_visit", "last_pid", "new_patient_info"]:
+        for k in ["last_prob", "last_df_raw", "last_df_proc", "last_visit", "last_pid", "new_patient_info"]:
             st.session_state.pop(k, None)
     st.session_state["searched_code"] = new_search
 
@@ -275,6 +366,7 @@ if patient is None:
             prob = predict_risk(df_proc)
             
             st.session_state["last_prob"] = prob
+            st.session_state["last_df_raw"] = df_raw
             st.session_state["last_df_proc"] = df_proc
             st.session_state["last_visit"] = {"date":fv_date,"ldl":fv_ldl,"hdl":fv_hdl,"trig":fv_trig}
             st.session_state["last_pid"] = None
@@ -288,6 +380,7 @@ if patient is None:
     # Show results if just predicted
     if "last_prob" in st.session_state and "last_pid" in st.session_state:
         render_results(st.session_state["last_prob"],
+                       st.session_state["last_df_raw"],
                        st.session_state["last_df_proc"],
                        st.session_state["last_pid"])
     st.stop()
@@ -351,6 +444,7 @@ if st.button("🔍 Phân tích Nguy cơ", type="primary", use_container_width=Tr
     df_proc = preprocess(df_raw)
     prob = predict_risk(df_proc)
     st.session_state["last_prob"] = prob
+    st.session_state["last_df_raw"] = df_raw
     st.session_state["last_df_proc"] = df_proc
     st.session_state["last_visit"] = {"date":v_date,"ldl":v_ldl,"hdl":v_hdl,"trig":v_trig}
     st.session_state["last_pid"] = patient["id"]
@@ -358,6 +452,7 @@ if st.button("🔍 Phân tích Nguy cơ", type="primary", use_container_width=Tr
 # ── Display Results ──────────────────────────────────────────────────────
 if "last_prob" in st.session_state and st.session_state.get("last_pid") == patient["id"]:
     render_results(st.session_state["last_prob"],
+                   st.session_state["last_df_raw"],
                    st.session_state["last_df_proc"], patient["id"])
 
 # ── Footer ────────────────────────────────────────────────────────────────
